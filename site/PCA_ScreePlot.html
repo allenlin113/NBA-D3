@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+	<title>CSE 332 | Bivariate Scatterplot</title>
+	<script type="text/javascript" src="http://d3js.org/d3.v4.min.js"></script>
+	<style>
+		h1 {
+			text-align: center;
+		}
+		.bar {
+			fill: steelblue;
+		}
+
+		.bar:hover {
+			width: 170px;
+			transform: translateY(-15px) translateX(-7px);
+			fill: orange;
+		}
+
+		.axis--x path {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="heading">
+		<p id="title">2015-2016 NBA Regular Season Data (Per 36 Minutes)</p>
+	</div>
+	
+	<div class="nav">
+			<ul>
+				<li><a href="bivariateScatterplot.html">Bivariate Scatterplot</a></li>
+				<li><a href="correlationMatrix.html">Correlation Matrix</a></li>
+				<li><a href="scatterPlotMatrix.html">Scatter Plot Matrix</a></li>
+				<li><a href="parallelCoordinates.html">Parallel Coordinates</a></li>
+				<li><a class="active" href="PCA_ScreePlot.html">PCA and Scree Plot</a></li>
+				<li><a href="biplot.html">Biplot</a></li>
+				<li><a href="MDS_Data.html">MDS (Data)</a></li>
+				<li><a href="MDS_Attributes.html">MDS (Attributes)</a></li>
+			</ul>
+	</div>
+
+
+	<h1 onclick="cycle()">Scree Plot</h1>
+
+		<form>
+			<select id="statsList" onchange="updateGraph()">
+				<option value="RB">Rebounds</option>
+				<option value="AST">Assists</option>
+				<option value="STL">Steals</option>
+				<option value="BLK">Blocks</option>
+				<option value="TOV">Turnovers</option>
+				<option value="PPG">Points</option>
+				<option value="FG">Field Goal %</option>
+				<option value="ThreeP">3 Point %</option>
+				<option value="TwoP">2 Point %</option>
+				<option value="FT">Free Throw %</option>
+			</select>
+		</form>
+
+		<svg width="960" height="500"></svg>
+		<script type="text/javascript">
+
+
+		updateGraph();
+
+		function cycle(){
+			var x = document.getElementById("statsList").value;
+			if (x=="RB"){
+				document.getElementById("statsList").value = "AST";
+				updateGraph();
+			}
+			else if (x=="AST"){
+				document.getElementById("statsList").value = "STL";
+				updateGraph();
+			}
+			else if (x=="STL"){
+				document.getElementById("statsList").value = "BLK";
+				updateGraph();
+			}
+			else if (x=="BLK"){
+				document.getElementById("statsList").value = "TOV";
+				updateGraph();
+			}
+			else if (x=="TOV"){
+				document.getElementById("statsList").value = "PPG";
+				updateGraph();
+			}
+			else if (x=="PPG"){
+				document.getElementById("statsList").value = "FG";
+				updateGraph();
+			}
+			else if (x=="FG"){
+				document.getElementById("statsList").value = "ThreeP";
+				updateGraph();
+			}
+			else if (x=="ThreeP"){
+				document.getElementById("statsList").value = "TwoP";
+				updateGraph();
+			}
+			else if (x=="TwoP"){
+				document.getElementById("statsList").value = "FT";
+				updateGraph();
+			}
+			else if (x=="FT"){
+				document.getElementById("statsList").value = "RB";
+				updateGraph();
+			}
+		}
+
+		function update(x,d) {
+			if (x=="RB"){
+				d.RB = +d.RB;
+				return d;
+			}
+			if (x=="AST"){
+				d.AST = +d.AST;
+				return d;
+			}
+			if (x=="STL"){
+				d.STL = +d.STL;
+				return d;
+			}
+			if (x=="BLK"){
+				d.BLK = +d.BLK;
+				return d;
+			}
+			if (x=="TOV"){
+				d.TOV = +d.TOV;
+				return d;
+			}
+			if (x=="PPG"){
+				d.PPG = +d.PPG;
+				return d;
+			}
+			if (x=="FG"){
+				d.FG = +d.FG;
+				return d;
+			}
+			if (x=="ThreeP"){
+				d.ThreeP = +d.ThreeP;
+				return d;
+			}
+			if (x=="TwoP"){
+				d.TwoP = +d.TwoP;
+				return d;
+			}
+			if (x=="FT"){
+				d.FT = +d.FT;
+				return d;
+			}
+		}
+
+		function update2(x, d) {
+			if (x=="RB"){
+				return d.RB;
+			}
+			if (x=="AST"){
+				return d.AST;
+			}
+			if (x=="STL"){
+				return d.STL;
+			}
+			if (x=="BLK"){
+				return d.BLK;
+			}
+			if (x=="TOV"){
+				return d.TOV;
+			}
+			if (x=="PPG"){
+				return d.PPG;
+			}
+			if (x=="FG"){
+				return d.FG;
+			}
+			if (x=="ThreeP"){
+				return d.ThreeP;
+			}
+			if (x=="TwoP"){
+				return d.TwoP;
+			}
+			if (x=="FT"){
+				return d.FT;
+			}
+		}
+
+		function updateGraph(){
+			var statsList = document.getElementById("statsList");
+			var statsName = statsList.options[statsList.selectedIndex].text;
+			var stats = document.getElementById("statsList").value;
+
+			var svg = d3.select("svg"),
+			margin = {top: 20, right: 20, bottom: 30, left: 40},
+			width = +svg.attr("width") - margin.left - margin.right,
+			height = +svg.attr("height") - margin.top - margin.bottom;
+
+			svg.selectAll("*").remove();
+
+			svg = d3.select("svg"),
+			margin = {top: 20, right: 20, bottom: 30, left: 40},
+			width = +svg.attr("width") - margin.left - margin.right,
+			height = +svg.attr("height") - margin.top - margin.bottom;
+
+			var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+			y = d3.scaleLinear().rangeRound([height, 0]);
+			
+			var g = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			d3.csv("statsSP.csv", function(d) {
+				//d.stats = +d.stats;
+				update(stats,d);
+
+				console.log(stats)
+				return d;
+			}, function(error, data) {
+				if (error) throw error;
+
+				x.domain(data.map(function(d) { return d.Pos; }));
+				y.domain([0, d3.max(data, function(d) { return update2(stats, d); })]);
+
+				g.append("g")
+				.attr("class", "axis axis--x")
+				.attr("transform", "translate(0," + height + ")")
+				.call(d3.axisBottom(x));
+
+				g.append("g")
+				.attr("class", "axis axis--y")
+				.call(d3.axisLeft(y).ticks(10))
+				.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 6)
+				.attr("dy", "0.71em")
+				.attr("text-anchor", "end")
+				.style("fill", "black")
+				.style("font-size", "13px")
+				.text(statsName);
+
+				g.selectAll(".bar") 
+				.data(data)
+				.enter().append("rect")
+				.attr("class", "bar")
+				.attr("x", function(d) { return x(d.Pos); })
+				.attr("y", function(d) { return y(update2(stats, d)); })
+				.attr("width", x.bandwidth())
+				.attr("height", function(d) { return height - y(update2(stats, d)); });
+
+				g.selectAll("bar")
+				.data(data)
+				.enter()
+				.append("text")
+				.style("font-size", "20px")
+				.style("fill", "steelblue")
+				.style("font-weight", "bold")
+				.text(function(d) { return update2(stats, d); })
+				.attr("x", function(d) { return x(d.Pos) + 75;})
+				.attr("y", function(d) { return y(update2(stats, d)) + 15; })
+				.style("text-anchor", "middle")
+			});
+	}
+
+	</script>
+	
+</body>		
+</html>

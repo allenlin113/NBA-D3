@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+	<title>CSE 332 | Bivariate Scatterplot</title>
+	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+	<style>
+		<style>
+		    svg {
+		      font: 10px sans-serif;
+		      text-anchor: middle;
+		    }
+		    
+		    rect {
+		      stroke: lightgray;
+		      stoke-width: 1px;
+		      fill: none;
+		    }
+		    
+		    .y.axis path{
+		      fill: none;
+		      stroke: none;
+		    }
+
+		    p {
+		    	font-size: 14px;
+		    }
+    
+
+	</style>
+</head>
+<body>
+
+	<div class="heading">
+		<p id="title">2015-2016 NBA Regular Season Data (Per 36 Minutes)</p>
+	</div>
+	
+	<div class="nav">
+			<ul>
+				<li><a href="bivariateScatterplot.html">Bivariate Scatterplot</a></li>
+				<li><a class="active" href="correlationMatrix.html">Correlation Matrix</a></li>
+				<li><a href="scatterPlotMatrix.html">Scatter Plot Matrix</a></li>
+				<li><a href="parallelCoordinates.html">Parallel Coordinates</a></li>
+				<li><a href="PCA_ScreePlot.html">PCA and Scree Plot</a></li>
+				<li><a href="biplot.html">Biplot</a></li>
+				<li><a href="MDS_Data.html">MDS (Data)</a></li>
+				<li><a href="MDS_Attributes.html">MDS (Attributes)</a></li>
+			</ul>
+	</div>
+
+	<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AST&nbsp;&nbsp;&nbsp;&nbsp;STL&nbsp;&nbsp;&nbsp;&nbsp;BLK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOV&nbsp;&nbsp;&nbsp;&nbsp;PPG&nbsp;&nbsp;&nbsp;&nbsp;FG%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3P%&nbsp;&nbsp;&nbsp;&nbsp;2P%&nbsp;&nbsp;&nbsp;&nbsp;FT%</p>
+	<br>
+
+
+	<script type="text/javascript">
+
+	d3.csv("statsCM.csv", function(error, rows) {
+		var data = [];
+
+      rows.forEach(function(d) {
+        var x = d[""];
+        delete d[""];
+        for (prop in d) {
+          var y = prop,
+            value = d[prop];
+          data.push({
+            x: x,
+            y: y,
+            value: +value
+          });
+        }
+      });
+
+      var margin = {
+          top: 25,
+          right: 80,
+          bottom: 25,
+          left: 100
+        },
+        width = 575 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+        domain = d3.set(data.map(function(d) {
+          return d.x
+        })).values(),
+        num = Math.sqrt(data.length),
+        color = d3.scale.linear()
+          .domain([-1, 0, 1])
+          .range(["red", "#fff", "#000080"]);
+
+      var x = d3.scale
+        .ordinal()
+        .rangePoints([0, width])
+        .domain(domain),
+      y = d3.scale
+        .ordinal()
+        .rangePoints([0, height])
+        .domain(domain),
+      xSpace = x.range()[1] - x.range()[0],
+      ySpace = y.range()[1] - y.range()[0];
+
+
+      var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+      var cor = svg.selectAll(".cor")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "cor")
+        .attr("transform", function(d) {
+          return "translate(" + x(d.x) + "," + y(d.y) + ")";
+        });
+        
+      cor.append("rect")
+        .attr("width", xSpace)
+        .attr("height", ySpace)
+        .attr("x", -xSpace / 2)
+        .attr("y", -ySpace / 2)
+
+      cor.filter(function(d){
+          var ypos = domain.indexOf(d.y);
+          var xpos = domain.indexOf(d.x);
+          for (var i = (ypos + 1); i < num; i++){
+            if (i === xpos) return false;
+          }
+          return true;
+        })
+
+      	.append("rect")
+      	.attr("y", -24)
+      	.attr("x", -23)
+      	.attr("width", 45)
+      	.attr("height", 49)
+        .style("fill", function(d){
+          if (d.value === 1) {
+            return "#000080";
+          } else {
+            return color(d.value);
+          }
+        });
+
+
+        cor.filter(function(d){
+          var ypos = domain.indexOf(d.y);
+          var xpos = domain.indexOf(d.x);
+          for (var i = (ypos + 1); i < num; i++){
+            if (i === xpos) return true;
+          }
+          return false;
+        })
+      	.append("rect")
+      	.attr("y", -24)
+      	.attr("x", -23)
+      	.attr("width", 45)
+      	.attr("height", 49)
+        .style("fill", function(d){
+          if (d.value === 1) {
+            return "#000080";
+          } else {
+            return color(d.value);
+          }
+        });
+
+    
+        
+    var aS = d3.scale
+      .linear()
+      .range([-margin.top + 5, height + margin.bottom - 5])
+      .domain([1, -1]);
+
+    var yA = d3.svg.axis()
+      .orient("right")
+      .scale(aS)
+      .tickPadding(7);
+
+    var aG = svg.append("g")
+      .attr("class", "y axis")
+      .call(yA)
+      .attr("transform", "translate(" + (width + margin.right / 2) + " ,0)")
+
+
+
+
+    var iR = d3.range(-1, 1.01, 0.01);
+    var h = height / iR.length + 3;
+    iR.forEach(function(d){
+        aG.append('rect')
+          .style('fill',color(d))
+          .style('stroke-width', 0)
+          .style('stoke', 'none')
+          .attr('height', h)
+          .attr('width', 10)
+          .attr('x', 0)
+          .attr('y', aS(d))
+      });
+    });
+
+
+	</script>
+	
+</body>		
+</html>
