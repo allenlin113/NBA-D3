@@ -1,7 +1,7 @@
 import pandas as pd
 import csv
 
-stats = pd.read_html('http://www.basketball-reference.com/leagues/NBA_2016_per_game.html')
+stats = pd.read_html('https://www.basketball-reference.com/leagues/NBA_2017_per_game.html')
 stats = stats[0]
 
 
@@ -19,6 +19,7 @@ stats[['G', 'MP', 'TRB', 'AST', 'STL', 'BLK', 'TOV', 'PS/G', 'FG', 'FGA', '3P', 
 stats['MP'] = stats['MP'] * stats['G']
 
 
+stats.to_csv('statsHELP.csv', index=False)
 stats = stats.drop(stats[stats['MP'] < 305].index)
 
 stats['TRB'] = stats['TRB'] * stats['G']
